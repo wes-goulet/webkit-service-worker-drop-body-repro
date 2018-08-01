@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <script>
+      if (!('serviceWorker' in navigator)) {
+        console.log('Service worker not supported',);
+      } else {
+        navigator.serviceWorker
+          .register('sw.js', { scope: '/' })
+          .then(function(reg) {
+            console.log('Service worker registered', reg);
+          })
+          .catch(function(error) {
+            console.log('Service worker registration failed', error);
+          });
+      }
+    </script>
+  </head>
+  <body>
+    Webkit has an issue with form posts that respond with a 307 redirect when there is a service worker registered.
+
+    <form method="POST" action="/form-submit-redirect">
+      <input name="USER" type="text"/>
+      <input name="PASSWORD" type="text"/>
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
