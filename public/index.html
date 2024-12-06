@@ -16,10 +16,13 @@
     </script>
   </head>
   <body>
-    Webkit has an issue with form POST requests that get cloned in service
-    worker.
+    Webkit has an issue with POST requests dropping the body in service worker.
     <form>
       <input required value="test" name="USER" type="text" />
+      <label>
+        Use x-www-form-urlencoded for body instead of json
+        <input type="checkbox" name="useform" />
+      </label>
       <button type="submit">Submit</button>
     </form>
     <div id="status"></div>
@@ -28,13 +31,26 @@
       const form = document.querySelector("form");
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const query = new URLSearchParams(formData);
 
-        fetch("/form-submit", {
+        const form_data = new FormData(e.target);
+
+        const use_form_url_encoded = form_data.get("useform");
+
+        const query = new URLSearchParams(form_data);
+
+        const request = new Request("/form-submit", {
           method: "POST",
-          body: query,
-        }).then((response) => {
+          body: use_form_url_encoded
+            ? new URLSearchParams(form_data)
+            : JSON.stringify({ USER: form_data.get("USER") }),
+          headers: {
+            "Content-Type": use_form_url_encoded
+              ? "application/x-www-form-urlencoded"
+              : "application/json",
+          },
+        });
+
+        fetch(request).then((response) => {
           let message = "";
           if (response.headers.has("X-Service-Worker")) {
             message += "[Service worker intercepted the request]";
