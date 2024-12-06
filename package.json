@@ -1,5 +1,5 @@
 {
-  "name": "webkit-service-worker-test",
+  "name": "webkit-service-worker-drop-body-repro",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
