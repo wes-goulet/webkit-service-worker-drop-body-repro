@@ -1,27 +1,57 @@
 <html>
   <head>
     <script>
-      if (!('serviceWorker' in navigator)) {
-        console.log('Service worker not supported',);
+      if (!("serviceWorker" in navigator)) {
+        console.log("Service worker not supported");
       } else {
         navigator.serviceWorker
-          .register('sw.js', { scope: '/' })
-          .then(function(reg) {
-            console.log('Service worker registered', reg);
+          .register("sw.js", { scope: "/" })
+          .then(function (reg) {
+            console.log("Service worker registered", reg);
           })
-          .catch(function(error) {
-            console.log('Service worker registration failed', error);
+          .catch(function (error) {
+            console.log("Service worker registration failed", error);
           });
       }
     </script>
   </head>
   <body>
-    Webkit has an issue with form posts that respond with a 307 redirect when there is a service worker registered.
-
-    <form method="POST" action="/form-submit-redirect">
-      <input name="USER" type="text"/>
-      <input name="PASSWORD" type="text"/>
+    Webkit has an issue with form POST requests that get cloned in service
+    worker.
+    <form>
+      <input required value="test" name="USER" type="text" />
       <button type="submit">Submit</button>
     </form>
+    <div id="status"></div>
+
+    <script>
+      const form = document.querySelector("form");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const query = new URLSearchParams(formData);
+
+        fetch("/form-submit", {
+          method: "POST",
+          body: query,
+        }).then((response) => {
+          let message = "";
+          if (response.headers.has("X-Service-Worker")) {
+            message += "[Service worker intercepted the request]";
+            console.log("Service worker intercepted the request");
+          } else {
+            message += "[Service worker did not intercept the request]";
+            console.log("Service worker did not intercept the request");
+          }
+
+          if (response.ok) {
+            message += "it worked";
+          } else {
+            message += "it failed";
+          }
+          document.querySelector("#status").innerHTML = message;
+        });
+      });
+    </script>
   </body>
 </html>
